@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<!-- 外部との通信をブラウザに禁止させる（connect-src 'none'）。読み込みも同じ場所のファイルだけに限る -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'none'; font-src 'none'; media-src 'none'; object-src 'none'; frame-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ぴょこ">
+<meta name="theme-color" content="#d9f2ff">
+<meta name="format-detection" content="telephone=no">
+<title>ぴょこと あそぼう</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-180.png">
+<link rel="stylesheet" href="style.css">
+<script src="app.js" defer></script>
+</head>
+<body>
+<main id="app">
+
+  <!-- はじめの画面（音声を使えるようにするため、最初に1回タップしてもらう） -->
+  <section id="screen-start" class="screen active">
+    <h1 class="title">ぴょこと<br>あそぼう</h1>
+    <div class="rabbit rabbit-big" id="start-rabbit"></div>
+    <button id="btn-start" class="btn-round btn-play" aria-label="はじめる">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+  </section>
+
+  <!-- ホーム -->
+  <section id="screen-home" class="screen">
+    <button class="gear" aria-label="保護者画面（2秒長押し）">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.3 7.3 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.3 7.3 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.2 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+    </button>
+    <div class="hello">
+      <div class="rabbit" id="home-rabbit"></div>
+      <p class="bubble">なにで あそぶ？</p>
+    </div>
+    <div class="menu">
+      <button class="menu-btn menu-iro" data-game="iro">
+        <span class="menu-pic" id="pic-iro"></span>
+        <span class="menu-label">いろ</span>
+      </button>
+      <button class="menu-btn menu-kazu" data-game="kazu">
+        <span class="menu-pic" id="pic-kazu"></span>
+        <span class="menu-label">かず</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- 問題 -->
+  <section id="screen-game" class="screen">
+    <header class="game-top">
+      <button id="btn-back" class="btn-icon" aria-label="おうちに もどる">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>
+      </button>
+      <div id="progress" class="progress"></div>
+    </header>
+    <div class="ask-row">
+      <div class="rabbit rabbit-small" id="game-rabbit"></div>
+      <p id="prompt" class="bubble"></p>
+    </div>
+    <div id="stage" class="stage"></div>
+  </section>
+
+  <!-- 1回分（5問）が終わったとき -->
+  <section id="screen-done" class="screen">
+    <div class="rabbit rabbit-big" id="done-rabbit"></div>
+    <p id="done-text" class="done-text"></p>
+    <p id="done-badge" class="badge-up" hidden></p>
+    <div id="done-stars" class="done-stars"></div>
+    <div id="done-buttons" class="done-buttons">
+      <button id="btn-again" class="btn-round btn-again" aria-label="もういちど">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5V1L7 6l5 5V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg>
+      </button>
+      <button id="btn-home" class="btn-round btn-home" aria-label="おうちに もどる">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg>
+      </button>
+    </div>
+  </section>
+
+  <!-- 1日の時間を使い切ったとき -->
+  <section id="screen-over" class="screen">
+    <button class="gear" aria-label="保護者画面（2秒長押し）">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.3 7.3 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.3 7.3 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.5 7.5 0 0 0 0 2l-2.2 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+    </button>
+    <div class="night-sky" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+    <div class="moon" aria-hidden="true"></div>
+    <div class="rabbit rabbit-big" id="over-rabbit"></div>
+    <p class="over-text">きょうは おしまい<br>また あしたね</p>
+  </section>
+
+  <!-- 保護者画面 -->
+  <section id="screen-parent" class="screen">
+    <div class="parent">
+      <h2>保護者画面</h2>
+
+      <div class="card">
+        <h3>今日の利用時間</h3>
+        <p class="big" id="p-today"></p>
+        <button id="p-extra" class="pbtn">あと5分ふやす</button>
+      </div>
+
+      <div class="card">
+        <h3>1日の上限</h3>
+        <div class="segs" id="p-limit"></div>
+        <p class="note">画面が表示されている間だけ数えます。上限になると「おしまい」の画面になります。</p>
+      </div>
+
+      <div class="card">
+        <h3>レベル</h3>
+        <div class="lv-row"><span class="lv-name">いろ</span><div class="segs" id="p-level-iro"></div></div>
+        <p class="note" id="p-streak-iro"></p>
+        <div class="lv-row"><span class="lv-name">かず</span><div class="segs" id="p-level-kazu"></div></div>
+        <p class="note" id="p-streak-kazu"></p>
+        <p class="note">5問中4問以上の正解が3回続くと、自動で次のレベルに上がります。</p>
+      </div>
+
+      <div class="card">
+        <h3>できるようになったこと</h3>
+        <ul id="p-milestones" class="milestones"></ul>
+      </div>
+
+      <div class="card">
+        <h3>記録（直近14日）</h3>
+        <table class="history">
+          <thead><tr><th>日付</th><th>時間</th><th>いろ</th><th>かず</th></tr></thead>
+          <tbody id="p-history"></tbody>
+        </table>
+        <p class="note">遊んだ回数と、1回目で正解できた割合。</p>
+      </div>
+
+      <div class="card">
+        <h3>バックアップ</h3>
+        <p class="note">記録はこの iPhone の中だけに保存されています。機種変更の前などに書き出しておくと、読み込んで元に戻せます。</p>
+        <div class="pbtn-row">
+          <button id="p-export" class="pbtn">記録を書き出す</button>
+          <label class="pbtn">記録を読み込む<input type="file" id="p-import" accept="application/json,.json" hidden></label>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>このアプリについて</h3>
+        <p class="note">記録はこの端末の中にだけ保存し、外部には送信しません。広告・アクセス解析・課金はありません。</p>
+        <p class="note">バージョン <span id="p-version"></span></p>
+      </div>
+
+      <button id="p-close" class="pbtn pbtn-main">子どもの画面にもどる</button>
+    </div>
+  </section>
+</main>
+
+<!-- 保護者画面に入る前の確認（足し算） -->
+<div id="lock" class="lock" hidden>
+  <div class="lock-box" role="dialog" aria-modal="true" aria-labelledby="lock-head">
+    <p class="lock-head" id="lock-head">保護者の方へ</p>
+    <p class="lock-sub">答えを選ぶと保護者画面を開きます</p>
+    <p id="lock-q" class="lock-q"></p>
+    <div id="lock-opts" class="lock-opts"></div>
+    <button id="lock-cancel" class="pbtn">とじる</button>
+  </div>
+</div>
+
+<div id="confetti" class="confetti" aria-hidden="true"></div>
+<div id="rotate" class="rotate"><p>たてに してね</p></div>
+</body>
+</html>
